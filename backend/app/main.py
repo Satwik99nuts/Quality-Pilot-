@@ -4,13 +4,21 @@ from app.core.config import settings
 from app.core.database import Base, engine
 from app.api import auth, products, cart, orders, users
 
-# Optional: Create tables on startup (For development only, use Alembic for production)
-Base.metadata.create_all(bind=engine)
+import os
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Skip creating tables on the real engine if we are running Pytest
+    if os.getenv("TESTING") != "True":
+        Base.metadata.create_all(bind=engine)
+    yield
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan
 )
 
 # Set up CORS

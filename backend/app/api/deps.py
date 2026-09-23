@@ -4,18 +4,11 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from app.core.config import settings
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, get_db
 from app.models.user import User
 from app.schemas.token import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
-
-def get_db() -> Generator:
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(oauth2_scheme)]

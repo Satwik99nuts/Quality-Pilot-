@@ -55,3 +55,19 @@
 **10. Concrete example:** We will use a `@pytest.fixture` to yield a test database session, automatically rolling back the transaction after each test so no test pollutes the database for another.
 **11. Likely interview questions:** "Why do you prefer Pytest over `unittest`?"
 **12. Short interview-ready answer:** "Pytest eliminates class-based boilerplate, allows plain assert statements with detailed introspection on failure, and offers an incredible fixture system that uses dependency injection for highly reusable setup and teardown code."
+
+## Decision 5: In-Memory SQLite for API Testing
+**1. Explain WHAT was chosen:** SQLite in-memory database (`sqlite:///:memory:`) combined with FastAPI dependency overrides for API testing.
+**2. Explain WHY it was chosen:** It allows tests to run completely isolated, deterministically, and blazingly fast without requiring a separate PostgreSQL instance for CI/CD or local test runs.
+**3. Explain the PROBLEM it solves:** Running tests against a real Postgres database introduces latency, requires managing test database state (truncating tables), and adds DevOps overhead for CI pipelines.
+**4. Explain what alternatives were considered:** Testcontainers (spinning up Docker Postgres), Mocking SQLAlchemy entirely.
+**5. Explain WHY those alternatives were not selected:** Testcontainers is too slow for fast unit/API tests (great for E2E though). Mocking SQLAlchemy completely hides real SQL syntax errors and defeats the purpose of integration testing endpoints.
+**6. Explain the trade-offs:** SQLite does not support all PostgreSQL features (like specific array types or JSONB). Tests might pass in SQLite but fail in Postgres if specialized syntax is used.
+**7. Explain the consequences:** We must stick to standard ANSI SQL or SQLAlchemy ORM abstractions that work across both, or conditionally skip tests.
+**8. Explain when this decision should be reconsidered:** If the application heavily utilizes Postgres-specific extensions (PostGIS, pgvector), we must switch to Testcontainers.
+**9. Affects:** Greatly improves test speed, maintainability, and developer experience.
+**10. Concrete example:** In `conftest.py`, `app.dependency_overrides[get_db] = override_get_db` replaces the Postgres session with an SQLite in-memory session dynamically.
+**11. Likely interview questions:** "Why did you use SQLite for testing when your production DB is Postgres?"
+**12. Short interview-ready answer:** "SQLite in-memory provides blazing fast, isolated test execution without DevOps overhead. While it sacrifices perfect database parity, I mitigate this by using standard SQLAlchemy ORM abstractions, saving Testcontainers for heavier E2E tests."
+ 
+ 

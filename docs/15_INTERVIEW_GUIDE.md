@@ -29,3 +29,6 @@ This document tracks likely interview questions based on the implementation of Q
 
 **Q:** How do you handle database states between unit tests?
 **A:** I use Pytest fixtures scoped to the function level. The fixture creates a database session, yields it to the test, and then explicitly rolls back the transaction or truncates tables in the teardown phase. This ensures strict isolation and prevents test pollution.
+
+**Q:** Why did you use SQLite for testing when your production DB is Postgres?
+**A:** SQLite in-memory provides blazing fast, isolated test execution without DevOps overhead. While it sacrifices perfect database parity, I mitigate this by using standard SQLAlchemy ORM abstractions, saving Testcontainers or a real Postgres instance for heavier E2E tests.
