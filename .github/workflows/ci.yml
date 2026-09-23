@@ -92,7 +92,7 @@ jobs:
         POSTGRES_PORT: "5432"
       run: |
         # Seed the database (creates tables if missing)
-        python app/db/seed.py
+        python -m app.db.seed
         # Start FastAPI in the background
         uvicorn app.main:app --port 8000 &
         
