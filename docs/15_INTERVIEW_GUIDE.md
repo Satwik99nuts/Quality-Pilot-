@@ -48,3 +48,13 @@ This document tracks likely interview questions based on the implementation of Q
 
 **Q:** How do you structure your test pyramid?
 **A:** Unit tests (Pytest) form the base — they're fast, isolated, and run on every commit. API integration tests (TestClient + SQLite) form the middle layer — they verify endpoint behavior without a browser. E2E tests (Playwright) are at the top — they're slower but validate the full user flow through a real browser. If a bug can be caught at the API layer, I write the test there instead of a slow E2E test.
+
+## Phase 6: CI/CD Pipeline (GitHub Actions)
+**Q:** Why did you split your CI pipeline into two jobs (Unit/API vs. E2E)?
+**A:** Splitting them allows the much faster Unit and API tests to run first. Since they use an in-memory SQLite database, they don't require heavy service containers. If they fail, the pipeline stops immediately, saving CI minutes. E2E tests only run if the foundation is stable, at which point the pipeline spins up a real Postgres container, the backend, and the frontend.
+
+**Q:** How do you handle E2E test failures in a headless CI environment where you can't see the browser?
+**A:** I configure `pytest-playwright` to capture traces (which include DOM snapshots, network logs, and screenshots) on failure. My GitHub Actions workflow automatically uploads these traces as artifacts using `actions/upload-artifact`. I can download the zip file and view it in the Playwright Trace Viewer locally to debug exactly what happened.
+
+**Q:** How do you manage database state during E2E tests in CI?
+**A:** I use GitHub Actions `services` to spin up an ephemeral `postgres:15` container. Before running the tests, I run Alembic migrations (`alembic upgrade head`) and execute a Python seed script (`seed.py`) to populate the database with known test data (products, users). This guarantees a clean, deterministic state for every CI run.
