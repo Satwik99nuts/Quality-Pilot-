@@ -87,9 +87,7 @@ jobs:
       env:
         DATABASE_URL: postgresql://shop_user:shop_password@localhost:5432/shopsphere
       run: |
-        # Run Alembic migrations
-        alembic upgrade head
-        # Seed the database
+        # Seed the database (creates tables if missing)
         python app/db/seed.py
         # Start FastAPI in the background
         uvicorn app.main:app --port 8000 &
