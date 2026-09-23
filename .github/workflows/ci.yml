@@ -85,7 +85,11 @@ jobs:
     - name: Setup Database and Start Backend
       working-directory: ./backend
       env:
-        DATABASE_URL: postgresql://shop_user:shop_password@localhost:5432/shopsphere
+        POSTGRES_USER: shop_user
+        POSTGRES_PASSWORD: shop_password
+        POSTGRES_DB: shopsphere
+        POSTGRES_SERVER: localhost
+        POSTGRES_PORT: "5432"
       run: |
         # Seed the database (creates tables if missing)
         python app/db/seed.py
@@ -107,7 +111,11 @@ jobs:
     - name: Run E2E Tests
       working-directory: ./backend
       env:
-        DATABASE_URL: postgresql://shop_user:shop_password@localhost:5432/shopsphere
+        POSTGRES_USER: shop_user
+        POSTGRES_PASSWORD: shop_password
+        POSTGRES_DB: shopsphere
+        POSTGRES_SERVER: localhost
+        POSTGRES_PORT: "5432"
       run: pytest tests/e2e -v --tracing=retain-on-failure
 
     - name: Upload Playwright Traces
