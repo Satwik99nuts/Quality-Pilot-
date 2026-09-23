@@ -32,3 +32,19 @@ This document tracks likely interview questions based on the implementation of Q
 
 **Q:** Why did you use SQLite for testing when your production DB is Postgres?
 **A:** SQLite in-memory provides blazing fast, isolated test execution without DevOps overhead. While it sacrifices perfect database parity, I mitigate this by using standard SQLAlchemy ORM abstractions, saving Testcontainers or a real Postgres instance for heavier E2E tests.
+
+## Phase 5: E2E UI Testing (Playwright)
+**Q:** Why Playwright instead of Selenium?
+**A:** Playwright offers built-in auto-waiting (no need for explicit `WebDriverWait`), multi-browser support out of the box, and a modern async API. It's faster, less flaky, and doesn't require managing separate WebDriver binaries. Using `pytest-playwright` keeps everything in our Python/Pytest ecosystem.
+
+**Q:** Why not use Cypress for E2E testing?
+**A:** Cypress only runs in Chromium-family browsers and has its own test runner (Mocha), which would split our test infrastructure between Python and JavaScript. Playwright supports Chrome, Firefox, and WebKit, and `pytest-playwright` lets us write E2E tests alongside our API and unit tests in the same framework.
+
+**Q:** How do you handle element selection in UI tests?
+**A:** I use `data-testid` attributes exclusively for E2E tests. They're immune to CSS class changes, text updates, and DOM restructuring. Playwright's `get_by_test_id()` makes them first-class citizens, keeping locators stable across visual refactors.
+
+**Q:** How do you handle E2E test flakiness?
+**A:** Three strategies: (1) Playwright's auto-waiting handles most timing issues automatically. (2) I use explicit `wait_for_url()` and `wait_for(state="visible")` for navigation and async data fetching. (3) Each test registers a fresh user with a unique email, ensuring complete data isolation between test runs.
+
+**Q:** How do you structure your test pyramid?
+**A:** Unit tests (Pytest) form the base — they're fast, isolated, and run on every commit. API integration tests (TestClient + SQLite) form the middle layer — they verify endpoint behavior without a browser. E2E tests (Playwright) are at the top — they're slower but validate the full user flow through a real browser. If a bug can be caught at the API layer, I write the test there instead of a slow E2E test.

@@ -69,5 +69,31 @@
 **10. Concrete example:** In `conftest.py`, `app.dependency_overrides[get_db] = override_get_db` replaces the Postgres session with an SQLite in-memory session dynamically.
 **11. Likely interview questions:** "Why did you use SQLite for testing when your production DB is Postgres?"
 **12. Short interview-ready answer:** "SQLite in-memory provides blazing fast, isolated test execution without DevOps overhead. While it sacrifices perfect database parity, I mitigate this by using standard SQLAlchemy ORM abstractions, saving Testcontainers for heavier E2E tests."
- 
- 
+
+## Decision 6: Playwright with pytest-playwright for E2E UI Testing
+**1. Explain WHAT was chosen:** Playwright (via `pytest-playwright`) for browser-based End-to-End (E2E) testing.
+**2. Explain WHY it was chosen:** Playwright is the modern standard for cross-browser automation. `pytest-playwright` integrates directly into our existing Pytest infrastructure, keeping the entire test stack in Python.
+**3. Explain the PROBLEM it solves:** API tests verify endpoint logic but cannot catch UI rendering bugs, JavaScript errors, broken navigation, or incorrect state management in the React frontend.
+**4. Explain what alternatives were considered:** Selenium with WebDriver, Cypress, Playwright in Node.js (TypeScript).
+**5. Explain WHY those alternatives were not selected:** Selenium is slower and more brittle (requires explicit waits everywhere). Cypress runs only in Chrome-family and uses its own test runner, splitting our stack. Node.js Playwright would require a separate TypeScript test codebase.
+**6. Explain the trade-offs:** E2E tests are inherently slower and more flaky than API tests. They require live services (backend + frontend + DB) to run. `pytest-playwright` is less commonly documented than Node.js Playwright.
+**7. Explain the consequences:** We must manage server lifecycle during E2E runs and use deterministic `data-testid` attributes on UI elements instead of fragile CSS selectors.
+**8. Explain when this decision should be reconsidered:** If the frontend team grows and prefers TypeScript-native test authoring, migrating to Node.js Playwright with `@playwright/test` would make sense.
+**9. Affects:** Greatly improves reliability (catches real browser bugs) and confidence in deployments.
+**10. Concrete example:** `test_full_checkout_flow` in `test_checkout_ui.py` walks through the entire purchase flow: browse -> add to cart -> fill payment -> submit -> verify "Order Confirmed!" success page.
+**11. Likely interview questions:** "Why Playwright instead of Selenium? Why not Cypress?"
+**12. Short interview-ready answer:** "Playwright offers auto-waiting, multi-browser support, and modern APIs. Using `pytest-playwright` keeps everything in Python alongside our API and unit tests. Unlike Selenium, there's no need for explicit waits or a separate WebDriver binary. Unlike Cypress, it supports all major browsers and doesn't require a JavaScript test runner."
+
+## Decision 7: data-testid Selectors for UI Automation
+**1. Explain WHAT was chosen:** Using `data-testid` attributes as the primary element selection strategy for E2E tests.
+**2. Explain WHY it was chosen:** `data-testid` attributes are decoupled from visual styling, semantic HTML, and dynamic class names (especially Tailwind utilities), making them resilient to UI refactors.
+**3. Explain the PROBLEM it solves:** CSS classes change frequently (especially with Tailwind), text content gets localized, and DOM structure evolves — all of which break traditional selectors.
+**4. Explain what alternatives were considered:** CSS selectors, XPath, ARIA roles, text content selectors.
+**5. Explain WHY those alternatives were not selected:** CSS selectors are fragile with Tailwind's long utility chains. XPath is verbose and brittle. ARIA roles are great for accessibility testing but not all elements have semantic roles. Text selectors break during internationalization.
+**6. Explain the trade-offs:** `data-testid` adds non-functional attributes to production HTML. This is a minor concern that can be stripped in production builds if needed.
+**7. Explain the consequences:** All testable UI elements must have a consistent `data-testid` naming convention, enforced during code review.
+**8. Explain when this decision should be reconsidered:** If the project adopts a testing library that strongly favors ARIA-based selection (like Testing Library's philosophy), we might shift to role-based selectors for component tests while keeping `data-testid` for E2E.
+**9. Affects:** Significantly improves test maintainability and reduces flakiness.
+**10. Concrete example:** `<button data-testid="checkout-submit">` is targeted by `page.get_by_test_id("checkout-submit")`, surviving any Tailwind class changes.
+**11. Likely interview questions:** "How do you handle element selection in UI tests?"
+**12. Short interview-ready answer:** "I use `data-testid` attributes exclusively for E2E tests. They're immune to CSS changes, text updates, and DOM restructuring. Playwright's `get_by_test_id()` makes them first-class citizens, keeping locators stable across refactors."
