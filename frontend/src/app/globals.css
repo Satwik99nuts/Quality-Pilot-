@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #e5e5e5;
+  --color-text-primary: #000000;
+  --color-text-secondary: #14213d;
+  --color-accent: #fca311;
+  --color-accent-hover: #e0900b;
+}
+
+.dark {
+  --color-bg-primary: #14213d;
+  --color-bg-secondary: #0a1120;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e5e5e5;
+  --color-accent: #fca311;
+  --color-accent-hover: #e0900b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-brand-bg: var(--color-bg-primary);
+  --color-brand-surface: var(--color-bg-secondary);
+  --color-brand-text: var(--color-text-primary);
+  --color-brand-muted: var(--color-text-secondary);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-accent-hover: var(--color-accent-hover);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

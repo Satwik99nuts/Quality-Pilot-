@@ -29,3 +29,12 @@ def update_user_me(session: SessionDep, current_user: CurrentUser, user_in: User
     session.commit()
     session.refresh(current_user)
     return current_user
+
+@router.get("/", response_model=list[UserSchema])
+def read_users(session: SessionDep) -> Any:
+    """
+    Retrieve all registered users (Admin only ideally, but keeping open for demo).
+    """
+    from app.models.user import User
+    users = session.query(User).all()
+    return users

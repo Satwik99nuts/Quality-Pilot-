@@ -17,15 +17,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-slate-50 min-h-screen flex flex-col`}>
+    <html lang="en" className="antialiased">
+      <body className={`${inter.className} bg-brand-bg text-brand-text min-h-screen flex flex-col transition-colors duration-300`}>
         <Providers>
           <Navbar />
-          <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
             {children}
           </main>
-          <footer className="bg-slate-900 text-slate-400 py-6 text-center text-sm">
-            ShopSphere - QualityPilot System Under Test
+          <footer className="bg-brand-surface text-brand-muted py-8 text-center text-sm border-t border-brand-bg">
+            <p className="font-medium">ShopSphere - QualityPilot System Under Test</p>
+            <p className="mt-2 text-xs opacity-70">Demo Application © 2026</p>
           </footer>
         </Providers>
       </body>

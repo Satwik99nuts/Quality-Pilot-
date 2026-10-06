@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import Base, engine
-from app.api import auth, products, cart, orders, users
+from app.api import auth, products, cart, orders, users, test_suites
 
 import os
 from contextlib import asynccontextmanager
@@ -36,6 +36,16 @@ app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["u
 app.include_router(products.router, prefix=f"{settings.API_V1_STR}/products", tags=["products"])
 app.include_router(cart.router, prefix=f"{settings.API_V1_STR}/cart", tags=["cart"])
 app.include_router(orders.router, prefix=f"{settings.API_V1_STR}/orders", tags=["orders"])
+app.include_router(test_suites.router, prefix=f"{settings.API_V1_STR}/suites", tags=["test_suites"])
+
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "project": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "docs": "/docs"
+    }
 
 @app.get("/health")
 def health_check():

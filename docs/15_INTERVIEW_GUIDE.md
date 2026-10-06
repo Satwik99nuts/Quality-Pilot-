@@ -58,3 +58,13 @@ This document tracks likely interview questions based on the implementation of Q
 
 **Q:** How do you manage database state during E2E tests in CI?
 **A:** I use GitHub Actions `services` to spin up an ephemeral `postgres:15` container. Before running the tests, I run Alembic migrations (`alembic upgrade head`) and execute a Python seed script (`seed.py`) to populate the database with known test data (products, users). This guarantees a clean, deterministic state for every CI run.
+
+## Phase 7: QualityPilot Dashboard (Test Execution Engine)
+**Q:** How do you execute Pytest from within a FastAPI application?
+**A:** I use Python's `asyncio.create_subprocess_exec` to spawn a background process running `python -m pytest --json-report`. This prevents the long-running tests from blocking the FastAPI event loop, allowing the API to return immediately while the tests execute asynchronously.
+
+**Q:** Why do you parse `pytest-json-report` instead of parsing standard terminal output?
+**A:** Terminal output is meant for humans and relies on fragile regex parsing which can break if Pytest updates its formatting. `pytest-json-report` provides a structured, predictable data format that is trivial to map directly to my `TestResult` database models.
+
+**Q:** Why persist test results in a database instead of just looking at CI logs?
+**A:** Persisting test runs in a relational database unlocks historical analysis. We can track flakiness over time, calculate pass rates, and most importantly for this project, it allows us to build a custom UI to pipe failed stack traces into an LLM for root cause analysis (which would be much harder to do securely and interactively from a raw CI log).
